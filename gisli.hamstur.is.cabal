@@ -1,0 +1,16 @@
+name:                gisli.hamstur.is
+version:             0.0
+synopsis:            Personal website
+description:         <Project description>
+category:            Web
+license:             BSD3
+license-file:        LICENSE
+author:              Gísli Kristjánsson
+maintainer:          gislik@hamstur.is
+build-depends:       base,feed,nano-md5,hscolour,json,curl
+build-type:          Simple
+hs-source-dirs:	     src
+
+executable:          gisli.hamstur.is
+main-is:             Main.hs
+ghc-options:         
