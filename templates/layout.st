@@ -94,7 +94,7 @@ jQuery(function() {
 
   $if(!user)$
   <p>
-  <a class="rpxnow" onclick="return false;" href="https://gisli-hamstur-is.rpxnow.com/openid/v2/signin?token_url=http://gisli.hamstur.is/users/token">Innskráning</a> 
+  <a class="rpxnow" onclick="return false;" href="https://localhost-hamstur-is.rpxnow.com/openid/v2/signin?token_url=http://127.0.0.1:5000/users/token">Innskráning</a> 
   </p>
   $endif$
 
@@ -152,9 +152,9 @@ $endif$
 
 <script src="/lib/widget.js" type="text/javascript"></script>
 <script type="text/javascript">
-RPXNOW.token_url = "http://gisli.hamstur.is/users/token";
+RPXNOW.token_url = "http://127.0.0.1:5000/users/token";
 
-RPXNOW.realm = "gisli-hamstur-is";
+RPXNOW.realm = "localhost-hamstur-is";
 RPXNOW.overlay = true;
 </script>
 <script type="text/javascript">

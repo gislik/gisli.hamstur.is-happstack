@@ -5,7 +5,7 @@ module Util.Atom (
                  showFeed
                  ) where
 
-import HAppS.Server
+import Happstack.Server
 import qualified Data.ByteString.Lazy.Char8 as L
 import qualified Data.ByteString.Char8 as B
 import qualified Text.Atom.Feed as A

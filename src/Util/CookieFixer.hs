@@ -1,9 +1,9 @@
 module Util.CookieFixer 
-    ( cookieFixer
+    ( -- cookieFixer
     ) where
 
-import HAppS.Server.Cookie (Cookie(..))
-import HAppS.Server(ServerPartT(..),Request(..), getHeader)
+import Happstack.Server.Cookie (Cookie(..))
+import Happstack.Server(ServerPartT(..),Request(..), getHeader)
 
 import qualified Data.ByteString.Char8 as C
 import Data.Char (chr, toLower)
@@ -63,11 +63,12 @@ cookieFixer :: Request -> Request
 cookieFixer request = [ (cookieName c, c) | cl <- fromMaybe [] (fmap getCookies (getHeader "Cookie" (rqHeaders request))), c <- cl ]
 -}
 
+{-
 cookieFixer :: ServerPartT m a -> ServerPartT m a
 cookieFixer (ServerPartT sp) = ServerPartT $ \request -> sp (request { rqCookies = (fixedCookies request) } )
     where
       fixedCookies request = [ (cookieName c, c) | cl <- fromMaybe [] (fmap getCookies (getHeader "Cookie" (rqHeaders request))), c <- cl ]
-
+-}
 -- | Get all cookies from the HTTP request. The cookies are ordered per RFC from
 -- the most specific to the least specific. Multiple cookies with the same
 -- name are allowed to exist.

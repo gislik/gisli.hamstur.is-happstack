@@ -3,8 +3,8 @@
 module AppState.Session where
 
 import Prelude hiding (lookup)
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import GHC.Conc
 import Control.Monad.Reader
 import Control.Monad.State

@@ -1,7 +1,7 @@
 module Controller.Atom (atomController) where
 
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import Control.Monad.Trans
 import Control.Monad
 import Helper
@@ -12,8 +12,8 @@ import AppState.AppDate
 import Model.Blog
 import Model.User
 
-atomController :: [ServerPartT IO Response]
-atomController = [dirindex [anyRequest atom]]
+atomController :: ServerPartT IO Response
+atomController = dirindex [anyRequest atom]
 
 atom :: WebT IO Response
 atom = do

@@ -3,7 +3,7 @@
 
 module Model.User where
 
-import HAppS.State
+import Happstack.State
 import Data.Generics
 import Data.Map
 import Text.StringTemplate

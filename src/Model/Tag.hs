@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell, DeriveDataTypeable, TypeSynonymInstances #-}
 module Model.Tag where
 
-import HAppS.State
+import Happstack.State
 import Model.Blog(BlogID)
 import Data.Generics
 import Data.Map

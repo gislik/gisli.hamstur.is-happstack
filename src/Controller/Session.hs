@@ -1,7 +1,7 @@
 module Controller.Session (sessionController) where
 
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import AppState.Types
 import AppEnv
 import Control.Monad
@@ -10,11 +10,11 @@ import Helper
 import AppState
 import Text.StringTemplate (newSTMP)
 
-sessionController :: [ServerPartT IO Response]
-sessionController = withAuthentication' [
-    dir "list" [list''],
-    dir "delete" [path (\id -> [withCookie "sid" $ delete id])],
-    dir "clean" [withCookie "sid" clean],
+sessionController :: ServerPartT IO Response
+sessionController = withAuthentication.msum $ [
+    dir "list" list'',
+    dir "delete" (path (\id -> withCookie "sid" $ delete id)),
+    dir "clean" (withCookie "sid" clean),
     dirindex [list'']
     ] 
     where list'' = wrapLayout.anyRequest $ list

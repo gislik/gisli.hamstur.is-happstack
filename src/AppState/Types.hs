@@ -3,8 +3,8 @@
              MultiParamTypeClasses, TypeSynonymInstances #-}
 module AppState.Types where
 
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import Data.Generics
 import Control.Monad.Reader
 import Control.Monad.State

@@ -2,8 +2,8 @@
 
 module Helper where
 
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import qualified Data.ByteString.Lazy.Char8 as L
 import qualified Data.ByteString.Char8 as B
 import Text.StringTemplate
@@ -19,7 +19,7 @@ import AppState
 import AppState.Types
 import Model.User
 
--- HAppS
+-- Happstack
 newtype Html a = Html a
 instance ToMessage (Html String) where
          toMessage (Html s) 	= L.pack s
@@ -33,16 +33,16 @@ renderResponse :: (Stringable a) => StringTemplate a -> IO Response
 renderResponse = return . toResponse . Html . stToString . render
 
 toWebT :: Request -> ServerPartT m a -> WebT m a
-toWebT = flip unServerPartT
+toWebT = flip runServerPartT
 
-withData' :: (Monad m, FromData a) => (a -> WebT m r) -> ServerPartT m r
-withData' controller = withData (\d -> [anyRequest (controller d)])
+--withData' :: (Monad m, FromData a) => (a -> WebT m r) -> ServerPartT m r
+withData' controller = withData (\d -> anyRequest (controller d))
 
 withDataFn' :: (Monad m) => Request -> RqData a -> (a -> WebT m r) -> WebT m r
-withDataFn' req rqData  = (flip unServerPartT) req . withDataFn'' rqData 
+withDataFn' req rqData  = (flip runServerPartT) req . withDataFn'' rqData 
 
-withDataFn'' :: (Monad m) => RqData a -> (a -> WebT m r) -> ServerPartT m r
-withDataFn'' rqData controller = withDataFn rqData $ \d -> [anyRequest (controller d)]
+--withDataFn'' :: (Monad m) => RqData a -> (a -> WebT m r) -> ServerPartT m r
+withDataFn'' rqData controller = withDataFn rqData $ \d -> anyRequest (controller d)
 
 withCookie_OLD :: (Monad m, Read a) => String -> (a -> WebT m r) -> ServerPartT m r
 withCookie_OLD = withDataFn'' . readCookieValue
@@ -50,9 +50,9 @@ withCookie_OLD = withDataFn'' . readCookieValue
 -- re-implemented withCookie to be able to use cookieFixer
 withCookie :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
 withCookie c handle = withRequest $ \req -> case lookup c (rqCookies req) of
-                                            Nothing  -> noHandle
-                                            Just a | cookieValue a == "0" -> noHandle
-                                            Just a | cookieValue a == ""  -> noHandle
+                                            Nothing  -> mzero
+                                            Just a | cookieValue a == "0" -> mzero
+                                            Just a | cookieValue a == ""  -> mzero
                                             Just a                        -> handle $ cookieValue a
 
 withJustCookie name = withDataFn'' $ liftM Just (readCookieValue name) `mplus` return Nothing            
@@ -71,7 +71,7 @@ dirindex sps = spsIf pr sps
 spsIf :: (Monad m) => (Request -> Bool) -> [ServerPartT m a] -> ServerPartT m a
 spsIf p sps = withRequest $ \req ->
          if p req
-            then unServerPartT (mconcat sps) req
+            then runServerPartT (mconcat sps) req
             else mempty
 
 seeOther' :: (Monad m) => String -> WebT m Response
@@ -87,9 +87,9 @@ respond = return . toResponse . Html
 showResponse :: (Monad m, Show a) => a -> WebT m Response
 showResponse = respond . show
 
-fileServe' :: (MonadIO m) => [FilePath] -> FilePath -> ServerPartT m Response
+--fileServe' :: (MonadIO m) => [FilePath] -> FilePath -> ServerPartT m Response
 fileServe' idxs dir = withRequest $ \req -> do
-           let res = applyRequest [fileServe idxs dir] req ::  Either (IO Response) String
+           let res = applyRequest (fileServe idxs dir) req ::  Either (IO Response) String
            res' <- liftIO $ either id (return.toResponse) res
            let isHtmFile = isSuffixOf ".htm" (rqUri req)
            let res'' = if isHtmFile 
@@ -98,9 +98,9 @@ fileServe' idxs dir = withRequest $ \req -> do
                           else res'
            return res''
             
-sourceServe :: (MonadIO m) => [FilePath] -> FilePath -> ServerPartT m Response
+--sourceServe :: (MonadIO m) => [FilePath] -> FilePath -> ServerPartT m Response
 sourceServe idxs dir = withRequest $ \req -> do
-            let res = applyRequest [fileServe idxs dir] req ::  Either (IO Response) String
+            let res = applyRequest (fileServe idxs dir) req ::  Either (IO Response) String
             res' <- liftIO $ either (handleResponse req) (return.id) res
             return $ (toResponse . Html) res'
                   
@@ -111,7 +111,7 @@ sourceServe idxs dir = withRequest $ \req -> do
                                       403       -> handleDirectory req res
                                       otherwise -> colorResponse res
                   colorResponse :: IO Response -> IO String
-                  colorResponse = liftM (hscolour HTML defaultColorPrefs True True False "Title" . L.unpack . rsBody)
+                  colorResponse = liftM (hscolour HTML defaultColorPrefs True True "Title" False . L.unpack . rsBody)
                   handleDirectory :: Request -> IO Response -> IO String
                   handleDirectory req orgRes = do
                                   currentDir <- getCurrentDirectory
@@ -157,7 +157,7 @@ defaultColorPrefs =  ColourPrefs
 wrapLayout :: ServerPartT IO LayoutResponse -> ServerPartT IO Response
 wrapLayout sp = do
            withRequest $ \req -> do
-                       lresp  <- unServerPartT sp $ req
+                       lresp  <- runServerPartT sp $ req
                        let attrs = layAttrs lresp                       
                        env    <- liftIO appEnv :: (WebT IO) (AppEnv String String)                        
                        sdata  <- query $ GetSession $ sid req
@@ -188,10 +188,10 @@ withSession sessionController = withCookie "sid" $ \sid -> do
 withAuthentication :: ServerPartT IO Response -> ServerPartT IO Response
 withAuthentication sp = do
                    withRequest $ \req -> do
-                               unServerPartT (withSession (sess req)) req
+                               runServerPartT (withSession (sess req)) req
                    where sess req (Just sdata) = do
                               uid <- query $ GetUser ((username.user) sdata)
-                              maybe unauthResponse (const (unServerPartT sp req)) uid
+                              maybe unauthResponse (const (runServerPartT sp req)) uid
                          sess _ Nothing = unauthResponse
                          unauthResponse = unauthorized.toResponse $ "unauthorized"
 

@@ -17,8 +17,8 @@ import Data.Map
 import Data.Char (isNumber)
 import Data.List (sortBy)
 import Data.Generics
-import HAppS.State
-import HAppS.Data
+import Happstack.State
+import Happstack.Data
 import Text.Feed.Types (Feed(AtomFeed), FeedKind(AtomKind), Item(AtomItem))
 import Text.Feed.Constructor (withFeedItems, atomEntryToItem)
 import Text.Feed.Util (toFeedDateString)

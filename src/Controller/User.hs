@@ -1,7 +1,7 @@
 module Controller.User (userController)  where
 
-import HAppS.Server
-import HAppS.State
+import Happstack.Server
+import Happstack.State
 import Control.Monad.Reader
 import Network.URI (URI, parseURI, nullURI)
 import Network.Curl
@@ -18,12 +18,12 @@ import Data.List (intercalate)
 import Model.User
 
 -- PUBLIC
-userController :: [ServerPartT IO Response]
-userController = [
-                 dir "login" [wrapLayout $ methodSP GET (anyRequest login)],
-                 dir "login" [methodSP POST $ withData' $ login' redirect'],
-                 dir "token" [withData' (token redirect')],
-                 dir "logout" [withCookie "sid" $ logout redirect', redirect'']
+userController :: ServerPartT IO Response
+userController = msum [
+                 dir "login" (wrapLayout $ methodSP GET (anyRequest login)),
+                 dir "login" (methodSP POST $ withData' $ login' redirect'),
+                 dir "token" (withData' (token redirect')),
+                 dir "logout" (msum [withCookie "sid" $ logout redirect', redirect''])
                  ]
                  where redirect' = seeOther' "/"
                        redirect'' = anyRequest redirect'

@@ -2,9 +2,9 @@ module Controller.Blog where
 
 import Prelude hiding (show)
 import qualified Prelude as P
-import HAppS.Server
-import HAppS.State
-import Control.Monad (liftM, liftM2, liftM5)
+import Happstack.Server
+import Happstack.State
+import Control.Monad (liftM, liftM2, liftM5, msum)
 import Control.Monad.Trans (liftIO, MonadIO)
 import System.Locale (defaultTimeLocale)
 import Data.List (isInfixOf)
@@ -22,25 +22,25 @@ import Model.Tag
 import Model.User
 
 -- PUBLIC 
-blogController :: [ServerPartT IO Response]
-blogController = [
-                 dir "list" [multi list''],
-                 dir "show" [withAuthentication.wrapLayout.path $ \id -> [anyRequest (show' id)]
-                            ,wrapLayout.path $ \id -> [anyRequest (show id)]],
-                 dir "edit" [path (\id -> [methodSP GET (withAuthentication.wrapLayout.anyRequest $ edit id), show'' GET id])],
-                 dir "edit" [path (\id -> [methodSP POST (withAuthentication.withRequest $ edit' id), show'' POST id])],
-                 dir "new" [withAuthentication (methodSP GET (wrapLayout.anyRequest $ new))
-                           ,listOther GET],
-                 dir "new" [withAuthentication (methodSP POST (withRequest new'))
-                           ,listOther POST],
-                 dir "delete" [path (\id -> [withAuthentication.anyRequest $ delete id, show'' GET id])],
-                 dir "tag" [path (\id -> [wrapLayout.anyRequest $ tag id])],
-                 dir "series" [path (\id -> [wrapLayout.anyRequest $ tag id])],
-                 dirindex [multi list'']
+blogController :: ServerPartT IO Response
+blogController = msum [
+                 dir "list" (msum list''),
+                 dir "show" (msum ([withAuthentication.wrapLayout.path $ \id -> anyRequest (show' id)
+                            ,wrapLayout.path $ \id -> anyRequest (show id)])),
+                 dir "edit" (path (\id -> msum [methodSP GET (withAuthentication.wrapLayout.anyRequest $ edit id), show'' GET id])),
+                 dir "edit" (path (\id -> msum [methodSP POST (withAuthentication.withRequest $ edit' id), show'' POST id])),
+                 dir "new" (msum [withAuthentication (methodSP GET (wrapLayout.anyRequest $ new))
+                           ,listOther GET]),
+                 dir "new" (msum [withAuthentication (methodSP POST (withRequest new'))
+                           ,listOther POST]),
+                 dir "delete" (path (\id -> msum [withAuthentication.anyRequest $ delete id, show'' GET id])),
+                 dir "tag" (path (\id -> wrapLayout.anyRequest $ tag id)),
+                 dir "series" (path (\id -> wrapLayout.anyRequest $ tag id)),
+                 dirindex [msum list'']
                  ]
                  where list'' = [withAuthentication.wrapLayout.anyRequest $ list', wrapLayout.anyRequest $ list]
                        listOther m = methodSP m $ anyRequest (seeOther' "/blog/list")
-                       show'' :: HAppS.Server.Method -> Int -> ServerPartT IO Response
+                       show'' :: Happstack.Server.Method -> Int -> ServerPartT IO Response
                        show'' m id = methodSP m $ seeOther'' $ "/blog/show/"++(P.show id)
 -- PRIVATE
 type BlogTitle = String
@@ -133,8 +133,8 @@ new = liftIO $ do
 
 new' :: Request -> WebT IO Response
 new' = \req -> do
-     (flip unServerPartT) req $ withData' $ \(BlogInfo title body date time private) -> do
-           (flip unServerPartT) req $ withSession $ \msdata -> do
+     (flip runServerPartT) req $ withData' $ \(BlogInfo title body date time private) -> do
+           (flip runServerPartT) req $ withSession $ \msdata -> do
                  let u = maybe NoUser user msdata
                  let publishedDate = maybe NoBlogDate toBlogDate 
                                            (parseTime defaultTimeLocale "%d.%m.%Y%H:%M:%S" (date++time))
