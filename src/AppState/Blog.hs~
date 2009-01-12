@@ -1,0 +1,21 @@
+{-# LANGUAGE FlexibleContexts #-}
+module AppState.Blog where
+
+import Control.Monad.State (MonadState, modify)
+import Control.Monad.Reader
+import AppState.Model
+import Model.Blog
+
+addSerialToBlogs :: [Blog] -> [Blog]
+addSerialToBlogs = addSerialToBlogs' 1
+
+addSerialToBlogs' :: Int -> [Blog] -> [Blog]
+addSerialToBlogs' _ [] = []
+addSerialToBlogs' n (blog:blogs) = blog {blogID=n} : addSerialToBlogs' (n+1) blogs
+
+listBlogs :: MonadReader AppState m => m [Blog]
+listBlogs = return . addSerialToBlogs . blogs =<< ask
+
+modBlogs :: (MonadState AppState m) => Blogs -> m ()
+modBlogs bs = modify (\s -> s { blogs = bs })
+           

@@ -1,0 +1,145 @@
+module Controller.Blog where
+
+import Prelude hiding (show)
+import qualified Prelude as P
+import HAppS.Server
+import HAppS.State
+import Control.Monad (liftM, liftM2, liftM4)
+import Control.Monad.Trans (liftIO, MonadIO)
+import System.Locale (defaultTimeLocale)
+import Data.Time
+import Data.Time.Format (parseTime)
+import Util
+import AppState
+import AppState.Model
+import AppState.Blog (addSerialToBlogs)
+import Model.Blog
+import Model.User
+
+-- PUBLIC 
+blogController :: [ServerPartT IO Response]
+blogController = [
+                 dir "list" [list'],
+                 dir "show" [wrapUserLayout $ path (\id -> [anyRequest (show id)])],
+                 dir "edit" [path (\id -> [methodSP GET (withAuthentication (wrapLayout (anyRequest (edit id)))), show'' GET id])],
+--                 dir "edit" [path (\id -> [methodSP POST (withAuthentication (withData' (edit' id))), show'' POST id])],
+                 dir "edit" [path (\id -> [methodSP POST (withAuthentication (withRequest (edit' id))), show'' POST id])],
+                 dir "new" [withAuthentication (methodSP GET (wrapLayout (anyRequest new))), list'' GET],
+                 dir "new" [withAuthentication (methodSP POST (withRequest new')), list'' POST],
+                 dir "delete" [path (\id -> [withAuthentication (anyRequest (delete id)), show'' GET id])],
+                 dirindex [list']
+                 ]
+                 where list' = wrapUserLayout $ anyRequest list
+                       show'' :: HAppS.Server.Method -> Int -> ServerPartT IO Response
+                       show'' m id = methodSP m $ seeOther'' $ "/blogs/show/"++(P.show id)
+                       list'' m = methodSP m $ anyRequest (seeOther' "/blogs/list")
+-- PRIVATE
+-- TODO: Create helper model functions and remove code from here
+type BlogTitle = String
+type BlogBody = String
+type BlogDate' = String
+type BlogTime' = String
+data BlogInfo = BlogInfo BlogTitle BlogBody BlogDate' BlogTime'
+instance FromData BlogInfo where
+         fromData = liftM4 BlogInfo (look "title") (look "body") (look "date") (look "time")
+
+list :: WebT IO (LayoutResponse' User)
+list = liftIO $ do
+     env           <- appEnv :: IO (AppEnv String String)
+     blogs         <- liftM (reverse.sortByDate) $ query ListBlogs
+     blogTemplate  <- liftM (attr "blogs" blogs) $ parseTemplate env "blogs_list"
+     returnLayout' $ attr' "user" "body" blogTemplate
+
+show :: Int -> WebT IO (LayoutResponse' User)
+show id  = liftIO $ do
+     env                 <- appEnv :: IO (AppEnv String String)     
+     blogs               <- query ListBlogs
+     blogTemplate        <- liftM (attr "blog" (blogs !! (id-1)) . attr "id" id) $ parseTemplate env "blogs_show" 
+     returnLayout' $ attr' "user" "body" blogTemplate -- catch errors
+
+edit :: Int -> WebT IO LayoutResponse
+edit id = liftIO $ do
+     env  <- appEnv :: IO (AppEnv String String)
+     blogs               <- query ListBlogs
+     blogTemplate        <- liftM (attr "blog" (blogs !! (id-1)) . attr "id" id) $ parseTemplate env "blogs_edit" 
+     returnLayout $ attr "body" blogTemplate -- catch errors
+
+{-     
+edit' :: Int -> BlogInfo -> WebT IO Response
+edit' id (BlogInfo title body date time) = do
+      let date' = maybe NoBlogDate toBlogDate 
+                        (parseTime defaultTimeLocale "%d.%m.%Y%H:%M:%S" (date++time))
+      let blog = Blog { 
+                      blogID=0, 
+                      blogTitle=title, 
+                      blogBody=body, 
+                      blogAuthor="G&iacute;sli Kristj&aacute;nsson", 
+                      blogDate=date' } -- TODO: fix
+      blogs <- liftIO $ query ListBlogs
+      let (b1, b2) = splitAt (id-1) blogs
+      update $ ModBlogs $ (b1 ++ (blog:(tail b2)))
+      seeOther' $ "/blogs/show/" ++ (P.show id)
+-}
+edit' :: Int -> Request -> WebT IO Response
+edit' id = \req -> do
+      (flip unServerPartT) req $ withData' $ \(BlogInfo title body date time) -> do
+            (flip unServerPartT) req $ withSession $ \msdata -> do
+                  let u = maybe NoUser user msdata
+                  let date' = maybe NoBlogDate toBlogDate 
+                              (parseTime defaultTimeLocale "%d.%m.%Y%H:%M:%S" (date++time))
+                  let blog = Blog { 
+                                  blogID=0, 
+                                  blogTitle=title, 
+                                  blogBody=body, 
+                                  blogAuthor=u, 
+                                  blogDate=date' }
+                  blogs <- liftIO $ query ListBlogs
+                  let (b1, b2) = splitAt (id-1) blogs
+                  update $ ModBlogs $ (b1 ++ (blog:(tail b2)))
+                  seeOther' $ "/blogs/show/" ++ (P.show id)
+      
+new :: WebT IO LayoutResponse
+new = liftIO $ do
+    env        <- appEnv :: IO (AppEnv String String)
+    template   <- parseTemplate env "blogs_new"
+    returnLayout $ attr "body" template 
+
+{-
+new' :: BlogInfo -> WebT IO Response
+new' (BlogInfo title body date time) = do
+     let date' = maybe NoBlogDate toBlogDate 
+                       (parseTime defaultTimeLocale "%d.%m.%Y%H:%M:%S" (date++time))
+     let blog = Blog { 
+                     blogID=0, 
+                     blogTitle=title, 
+                     blogBody=body, 
+                     blogAuthor=NoUser, 
+                     blogDate=date' } -- fix
+     blogs <- liftIO $ query ListBlogs
+     update $ ModBlogs $ (blogs++[blog])
+     seeOther' "/blogs/list" 
+-}
+
+new' :: Request -> WebT IO Response
+new' = \req -> do
+     (flip unServerPartT) req $ withData' $ \(BlogInfo title body date time) -> do
+           (flip unServerPartT) req $ withSession $ \msdata -> do
+                 let u = maybe NoUser user msdata
+                 let date' = maybe NoBlogDate toBlogDate 
+                            (parseTime defaultTimeLocale "%d.%m.%Y%H:%M:%S" (date++time))
+                 let blog = Blog { 
+                                 blogID=0, 
+                                 blogTitle=title, 
+                                 blogBody=body, 
+                                 blogAuthor=u, 
+                                 blogDate=date' }
+                 blogs <- liftIO $ query ListBlogs
+                 update $ ModBlogs $ (blogs++[blog])
+                 seeOther' "/blogs/list" 
+
+delete :: Int -> WebT IO Response
+delete id = do
+       blogs <- liftIO $ query ListBlogs
+       let (b1, b2) = splitAt (id-1) blogs
+       update $ ModBlogs $ (b1 ++ (tail b2))
+       seeOther' "/blogs/list"

@@ -1,0 +1,55 @@
+{-# LANGUAGE TemplateHaskell, DeriveDataTypeable, FlexibleInstances #-}
+
+module Model.Blog (
+                  Blog(..), 
+                  Blogs, 
+                  BlogDate(NoBlogDate), 
+                  toBlogDate, 
+                  fromBlogDate,
+                  sortByDate
+                  ) where
+
+import Data.Time
+import Text.StringTemplate
+import Data.Map
+import Data.Char (isNumber)
+import Data.List (sortBy)
+import Data.Generics
+import HAppS.State
+import HAppS.Data
+import Model.User
+
+-- MODEL
+data BlogDate = BlogDate Integer Integer | NoBlogDate
+        deriving (Show, Read, Data, Typeable, Ord, Eq)
+
+instance Version BlogDate
+$(deriveSerialize ''BlogDate)
+
+data Blog = Blog {
+     blogID      :: Int,
+     blogTitle   :: String,
+     blogBody    :: String,
+     blogDate    :: BlogDate,
+     blogAuthor  :: User
+     } deriving (Show, Read, Data, Typeable)
+
+instance Version Blog
+$(deriveSerialize ''Blog)
+
+-- FUNCTIONS
+toBlogDate :: UTCTime -> BlogDate
+toBlogDate (UTCTime d dt) = BlogDate (toModifiedJulianDay d) $ (read.takeWhile isNumber.show) dt
+fromBlogDate :: BlogDate -> UTCTime
+fromBlogDate (BlogDate d s) =  UTCTime (ModifiedJulianDay d) (secondsToDiffTime s)
+fromBlogDate NoBlogDate = UTCTime (ModifiedJulianDay 0) (secondsToDiffTime 0)
+
+sortByDate :: [Blog] -> [Blog]
+sortByDate = sortBy (\b1 b2 -> compare (blogDate b1) (blogDate b2))
+
+
+-- TEMPLATE
+instance ToSElem Blog where
+         toSElem b = (toSElem.fromList) [("id", (show.blogID) b), ("title", blogTitle b), ("body", blogBody b), ("date", (stringTemplateFormattedShow "%d.%m.%Y".fromBlogDate.blogDate) b), ("time", (stringTemplateFormattedShow "%H:%M:%S".fromBlogDate.blogDate) b), ("author", (name.blogAuthor) b)]
+
+type Blogs = [Blog]
