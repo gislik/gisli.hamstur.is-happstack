@@ -135,7 +135,8 @@ $endif$
   <li><a href="http://happstutorial.com">Real World HAppS</a></li>
   <li><a href="http://baldurkristjans.is">Baldur Kristjáns</a></li>
   <li><a href="http://bktimes.is">BK Times</a></li>
-  <li><a href="http://darri.skuli.is">Gísli Darri</a></li>
+  <li><a href="http://darri.april.is">Gísli Darri</a></li>
+  <li><a href="http://www.hfv.is">H.F. Verðbréf</a></li>
 </ul>
 
 <div class="hr"></div>
