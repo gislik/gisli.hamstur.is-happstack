@@ -25,11 +25,14 @@ import Model.User
 blogController :: [ServerPartT IO Response]
 blogController = [
                  dir "list" [multi list''],
-                 dir "show" [withAuthentication.wrapLayout.path $ \id -> [anyRequest (show' id)], wrapLayout.path $ \id -> [anyRequest (show id)]],
+                 dir "show" [withAuthentication.wrapLayout.path $ \id -> [anyRequest (show' id)]
+                            ,wrapLayout.path $ \id -> [anyRequest (show id)]],
                  dir "edit" [path (\id -> [methodSP GET (withAuthentication.wrapLayout.anyRequest $ edit id), show'' GET id])],
                  dir "edit" [path (\id -> [methodSP POST (withAuthentication.withRequest $ edit' id), show'' POST id])],
-                 dir "new" [withAuthentication (methodSP GET (wrapLayout.anyRequest $ new)), listOther GET],
-                 dir "new" [withAuthentication (methodSP POST (withRequest new')), listOther POST],
+                 dir "new" [withAuthentication (methodSP GET (wrapLayout.anyRequest $ new))
+                           ,listOther GET],
+                 dir "new" [withAuthentication (methodSP POST (withRequest new'))
+                           ,listOther POST],
                  dir "delete" [path (\id -> [withAuthentication.anyRequest $ delete id, show'' GET id])],
                  dir "tag" [path (\id -> [wrapLayout.anyRequest $ tag id])],
                  dir "series" [path (\id -> [wrapLayout.anyRequest $ tag id])],
@@ -47,7 +50,11 @@ type BlogTime' = String
 type BlogPrivate = String
 data BlogInfo = BlogInfo BlogTitle BlogBody BlogDate' BlogTime' BlogPrivate
 instance FromData BlogInfo where
-         fromData = liftM5 BlogInfo (look "title") (look "body") (look "date") (look "time") (look "private")
+         fromData = liftM5 BlogInfo (look "title") 
+                                    (look "body") 
+                                    (look "date") 
+                                    (look "time") 
+                                    (look "private")
 
 list :: WebT IO LayoutResponse
 list = liftIO $ do
@@ -71,7 +78,8 @@ show id  = liftIO $ do
      blog                <- query $ GetBlog id
      blogTemplate        <- case blog of
           Nothing -> parseTemplate env "404"
-          Just b  -> liftM (attr "blog" b.attr "id" id) $ parseTemplate env "blogs_show" 
+          Just b  -> liftM (attr "blog" b
+                           .attr "id" id) $ parseTemplate env "blogs_show" 
      let title = attr "title" $ maybe "Fannst ekki" blogTitle blog
      returnLayout Nothing (attrSession' title "body" blogTemplate)
 
@@ -81,7 +89,8 @@ show' id  = liftIO $ do
      blog                <- query $ GetBlog' id
      blogTemplate        <- case blog of
           Nothing -> parseTemplate env "404"
-          Just b  -> liftM (attr "blog" b.attr "id" id) $ parseTemplate env "blogs_show" 
+          Just b  -> liftM (attr "blog" b
+                           .attr "id" id) $ parseTemplate env "blogs_show" 
      let title = attr "title" $ maybe "Fannst ekki" blogTitle blog
      returnLayout Nothing (attrSession' title "body" blogTemplate)
 
@@ -91,7 +100,8 @@ edit id = liftIO $ do
      blog                <- query $ GetBlog' id
      blogTemplate        <- case blog of
           Nothing -> parseTemplate env "404"
-          Just b  -> liftM (attr "blog" b.attr "id" id) $ parseTemplate env "blogs_edit" 
+          Just b  -> liftM (attr "blog" b
+                           .attr "id" id) $ parseTemplate env "blogs_edit" 
      let title = attr "title" $ maybe "Fannst ekki" blogTitle blog
      returnLayout Nothing (attrSession' title "body" blogTemplate)
 

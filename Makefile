@@ -10,6 +10,12 @@ export LD_LIBRARY_PATH
 all: 	$(SRC)/$(MAIN)
 	ghc -i$(SRC) --make -o $(BINARY) $(SRC)/$(MAIN)
 
+clean:	$(SRC)/*.o  $(SRC)/*/*.o
+	find $(SRC) -type f -name "*.o" -exec rm {} \;
+
+clean-bin:	$(BINARY)
+		rm $(BINARY)
+
 localhost:	$(TEMPLATES)/layout.st
 		sed -e 's/gisli-hamstur-is/localhost-hamstur-is/g;s/gisli.hamstur.is/127.0.0.1:5000/g' -i.bak $(TEMPLATES)/layout.st
 

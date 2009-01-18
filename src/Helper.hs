@@ -10,7 +10,7 @@ import Text.StringTemplate
 import Control.Monad.Reader
 import Data.List (intercalate, isInfixOf, isSuffixOf)
 import System.Directory (getDirectoryContents, getCurrentDirectory, doesDirectoryExist)
-import System.FilePath.Posix (combine, takeExtension, hasExtension)
+import System.FilePath (combine, takeExtension, hasExtension)
 import Language.Haskell.HsColour
 import Language.Haskell.HsColour.ColourHighlight
 import Data.Monoid
