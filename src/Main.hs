@@ -15,14 +15,12 @@ import Controller.User
 import Controller.Atom
 import Controller.Session
 import Text.StringTemplate (newSTMP)
-import Util.CookieFixer
 
 main :: IO ()
 main = do
      putStrLn "Starting ..."
      control <- startSystemState entryPoint
      tid <- forkIO $ simpleHTTP (Conf {port=5000, validator=Nothing}) $
-		   [cookieFixer.multi $
                    [dir "users" userController] ++                    
                    [dir "blog" blogController] ++
                    [dir "atom" atomController] ++
@@ -30,7 +28,7 @@ main = do
                    [dir "proxy" [proxyServe ["google.com","*.google.com"]]] ++
                    [dir "src" [sourceServe [] "src"]] ++
                    [dirindex [withRequest void]] ++
-                   [fileServe' ["index.html"] "public"]]
+                   [fileServe' ["index.html"] "public"]
 --     putStrLn "Creating checkpoint"
 --     createCheckpoint control
      putStrLn "Started"
