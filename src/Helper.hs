@@ -45,12 +45,12 @@ withDataFn' req rqData  = (flip unServerPartT) req . withDataFn'' rqData
 withDataFn'' :: (Monad m) => RqData a -> (a -> WebT m r) -> ServerPartT m r
 withDataFn'' rqData controller = withDataFn rqData $ \d -> [anyRequest (controller d)]
 
-withCookie :: (Monad m, Read a) => String -> (a -> WebT m r) -> ServerPartT m r
-withCookie = withDataFn'' . readCookieValue
+withCookie_OLD :: (Monad m, Read a) => String -> (a -> WebT m r) -> ServerPartT m r
+withCookie_OLD = withDataFn'' . readCookieValue
 
 -- re-implemented withCookie to be able to use cookieFixer
-withCookie' :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
-withCookie' c handle = cookieFixer.withRequest $ \req -> case lookup c (rqCookies req) of
+withCookie :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
+withCookie c handle = cookieFixer.withRequest $ \req -> case lookup c (rqCookies req) of
                                             Nothing -> noHandle
                                             Just a  -> handle $ cookieValue a
 
@@ -177,7 +177,7 @@ wrapFilter = Prelude.map wrapLayout
 
 withSession :: (Maybe SessionData -> WebT IO a) 
                       -> ServerPartT IO a
-withSession sessionController = withCookie' "sid" $ \sid -> do
+withSession sessionController = withCookie "sid" $ \sid -> do
             session <- query $ GetSession sid
             sessionController session
 
