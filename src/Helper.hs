@@ -18,6 +18,7 @@ import AppEnv
 import AppState
 import AppState.Types
 import Model.User
+import Util.CookieFixer
 
 -- HAppS
 newtype Html a = Html a
@@ -46,6 +47,12 @@ withDataFn'' rqData controller = withDataFn rqData $ \d -> [anyRequest (controll
 
 withCookie :: (Monad m, Read a) => String -> (a -> WebT m r) -> ServerPartT m r
 withCookie = withDataFn'' . readCookieValue
+
+-- re-implemented withCookie to be able to use cookieFixer
+withCookie' :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
+withCookie' c handle = cookieFixer.withRequest $ \req -> case lookup c (rqCookies req) of
+                                            Nothing -> noHandle
+                                            Just a  -> handle $ cookieValue a
 
 withJustCookie name = withDataFn'' $ liftM Just (readCookieValue name) `mplus` return Nothing            
 
@@ -170,7 +177,7 @@ wrapFilter = Prelude.map wrapLayout
 
 withSession :: (Maybe SessionData -> WebT IO a) 
                       -> ServerPartT IO a
-withSession sessionController = withCookie "sid" $ \sid -> do
+withSession sessionController = withCookie' "sid" $ \sid -> do
             session <- query $ GetSession sid
             sessionController session
 
