@@ -18,7 +18,6 @@ import AppEnv
 import AppState
 import AppState.Types
 import Model.User
-import Util.CookieFixer
 
 -- HAppS
 newtype Html a = Html a
