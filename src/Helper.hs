@@ -50,8 +50,10 @@ withCookie_OLD = withDataFn'' . readCookieValue
 -- re-implemented withCookie to be able to use cookieFixer
 withCookie :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
 withCookie c handle = withRequest $ \req -> case lookup c (rqCookies req) of
-                                            Nothing -> noHandle
-                                            Just a  -> handle $ cookieValue a
+                                            Nothing  -> noHandle
+                                            Just a | cookieValue a == "0" -> noHandle
+                                            Just a | cookieValue a == ""  -> noHandle
+                                            Just a                        -> handle $ cookieValue a
 
 withJustCookie name = withDataFn'' $ liftM Just (readCookieValue name) `mplus` return Nothing            
 

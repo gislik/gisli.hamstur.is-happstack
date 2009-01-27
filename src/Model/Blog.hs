@@ -84,8 +84,8 @@ instance ToSElem Blog where
          toSElem b = (toSElem.fromList. Prelude.filter ((/=)"False".snd)) [("id", (show.blogID) b), 
                                          ("title", blogTitle b), 
                                          ("body", blogBody b), 
-                                         ("date", (stringTemplateFormattedShow "%d.%m.%Y".fromBlogDate.blogDate) b), 
-                                         ("time", (stringTemplateFormattedShow "%H:%M:%S".fromBlogDate.blogDate) b), 
+                                         ("date", (stringTemplateFormattedShow "%d.%m.%Y".fromBlogDate.blogPublishedDate) b), 
+                                         ("time", (stringTemplateFormattedShow "%H:%M:%S".fromBlogDate.blogPublishedDate) b), 
                                          ("author", (name.blogAuthor) b),
                                          ("private", (show.blogPrivate) b)]
 
