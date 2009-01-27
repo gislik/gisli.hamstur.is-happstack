@@ -50,7 +50,7 @@ withCookie_OLD = withDataFn'' . readCookieValue
 
 -- re-implemented withCookie to be able to use cookieFixer
 withCookie :: (Monad m) => String -> (String -> WebT m r) -> ServerPartT m r
-withCookie c handle = cookieFixer.withRequest $ \req -> case lookup c (rqCookies req) of
+withCookie c handle = withRequest $ \req -> case lookup c (rqCookies req) of
                                             Nothing -> noHandle
                                             Just a  -> handle $ cookieValue a
 
@@ -169,7 +169,10 @@ wrapLayout sp = do
                             Nothing -> do 
                                     layoutTemplate <- parseLayout env
                                     liftIO.renderResponse $ attrs Nothing Nothing layoutTemplate
-            where sid req = maybe "" id $ readData ((readCookieValue "sid")::RqData SessionID) req
+-- Had to be rewritten because of cookieFixer
+--            where sid req = maybe "" id $ readData ((readCookieValue "sid")::RqData SessionID) req
+           where sid req = maybe "" cookieValue $ lookup "sid" (rqCookies req)
+              
 
 
 wrapFilter :: [ServerPartT IO LayoutResponse] -> [ServerPartT IO Response]
@@ -190,6 +193,9 @@ withAuthentication sp = do
                               maybe unauthResponse (const (unServerPartT sp req)) uid
                          sess _ Nothing = unauthResponse
                          unauthResponse = unauthorized.toResponse $ "unauthorized"
+
+withAuthentication' :: [ServerPartT IO Response] -> [ServerPartT IO Response]
+withAuthentication' = map withAuthentication
 
 -- TEMPLATE
 data LayoutResponse = LayoutResponse {

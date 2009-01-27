@@ -11,7 +11,7 @@ import AppState
 import Text.StringTemplate (newSTMP)
 
 sessionController :: [ServerPartT IO Response]
-sessionController = [
+sessionController = withAuthentication' [
     dir "list" [list''],
     dir "delete" [path (\id -> [withCookie "sid" $ delete id])],
     dir "clean" [withCookie "sid" clean],
