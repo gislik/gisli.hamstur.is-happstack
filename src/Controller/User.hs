@@ -72,7 +72,7 @@ token action = \(Token token) -> do
            Nothing      -> respond body
            Just user    -> do
                 sid <- update $ (NewSession . SessionData) user
-                addCookie (-1) $ mkCookie "sid" $ show sid -- this show is mighty important!
+                addCookie (-1) $ mkCookie "sid" $ sid -- this show is mighty important!
                 action
       where fromJSObject' (JSObject v) = fromJSObject v
             fromJSObject' _            = []
