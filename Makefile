@@ -16,6 +16,9 @@ clean:	$(SRC)/*.o  $(SRC)/*/*.o
 clean-bin:	$(BINARY)
 		rm $(BINARY)
 
+clean-haskell:	$(SRC)/*.hi $(SRC)/*/*.hi
+		find $(SRC) -type f -name "*.hi" -exec rm {} \;
+
 localhost:	$(TEMPLATES)/layout.st
 		sed -e 's/gisli-hamstur-is/localhost-hamstur-is/g;s/gisli.hamstur.is/127.0.0.1:5000/g' -i.bak $(TEMPLATES)/layout.st
 

@@ -1,2 +1,5 @@
 *.happs
 *.hi
+.DS_Store
+_local
+gisli.hamstur.is
