@@ -39,6 +39,7 @@ blockquote {
 	color:#C60;
 	padding-left:40px;
 	margin-left:0;
+	font-style:italic;
 	background:url(../images/quote.gif) no-repeat;
 }
 
