@@ -1,6 +1,7 @@
 *.happs
 *.hi
 *.o
+*.bak
 .DS_Store
 _local
 gisli.hamstur.is
