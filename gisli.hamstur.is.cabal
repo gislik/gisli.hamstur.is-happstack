@@ -1,4 +1,4 @@
-name:                gisli.hamstur.is
+name:                gisliblog
 version:             0.0
 synopsis:            Personal website
 description:         <Project description>
@@ -7,10 +7,10 @@ license:             BSD3
 license-file:        LICENSE
 author:              Gísli Kristjánsson
 maintainer:          gislik@hamstur.is
-build-depends:       base,feed,nano-md5,hscolour,json,curl
+build-depends:       base,feed,nano-md5,hscolour,json,curl,HStringTemplate,happstack
 build-type:          Simple
 hs-source-dirs:	     src
 
 executable:          gisli.hamstur.is
-main-is:             Main.hs
-ghc-options:         
+main-is:             src/Main.hs
+ghc-options: 	     -isrc        

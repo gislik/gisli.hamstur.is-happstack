@@ -4,3 +4,8 @@
 .DS_Store
 _local
 gisli.hamstur.is
+*~
+dist
+public/gisli.hamstur.is.git
+public/video/*
+
