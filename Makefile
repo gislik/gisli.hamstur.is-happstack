@@ -10,6 +10,9 @@ export LD_LIBRARY_PATH
 all: 	$(SRC)/$(MAIN)
 	ghc -i$(SRC) --make -o $(BINARY) $(SRC)/$(MAIN)
 
+build:	$(SRC)/$(MAIN)
+	ghc -i$(SRC) -c $(SRC)/$(MAIN)
+
 clean:	$(SRC)/*.o  $(SRC)/*/*.o
 	find $(SRC) -type f -name "*.o" -exec rm {} \;
 

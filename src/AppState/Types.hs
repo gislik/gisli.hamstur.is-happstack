@@ -1,6 +1,9 @@
 {-# LANGUAGE TemplateHaskell, DeriveDataTypeable, TypeFamilies, 
              FlexibleContexts, FlexibleInstances,
              MultiParamTypeClasses, TypeSynonymInstances #-}
+
+
+-- move this to Model.App (App.Model) - I think it makes more sense
 module AppState.Types where
 
 import Happstack.Server

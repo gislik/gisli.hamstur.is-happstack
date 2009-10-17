@@ -89,7 +89,7 @@ instance ToSElem Blog where
                                          ("author", (name.blogAuthor) b),
                                          ("private", (show.blogPrivate) b)]
 
-type Blogs = [Blog]
+type Blogs = [Blog] -- this needs to be changed to a map with blogsLastUpdated contained
 
 -- ATOM
 instance Feedable Blogs where

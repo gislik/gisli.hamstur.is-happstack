@@ -22,8 +22,9 @@ import Model.Tag
 import Model.User
 
 -- PUBLIC 
-blogController :: ServerPartT IO Response
+blogController :: ServerPart Response
 blogController = msum [
+                 dir "test" (mapServerPartT id test),
                  dir "list" (msum list''),
                  dir "show" (msum ([withAuthentication.wrapLayout.path $ \id -> anyRequest (show' id)
                             ,wrapLayout.path $ \id -> anyRequest (show id)])),
@@ -55,6 +56,14 @@ instance FromData BlogInfo where
                                     (look "date") 
                                     (look "time") 
                                     (look "private")
+
+
+-- This test function is being developed to simplify the code structure.
+-- The plan is to remove WebT from the vocabulary and ease the use of withAuthentication and wrapLayout
+-- mapServerPartT
+test :: ServerPart Response
+test = ok.toResponse $ "hello world"
+
 
 list :: WebT IO LayoutResponse
 list = liftIO $ do

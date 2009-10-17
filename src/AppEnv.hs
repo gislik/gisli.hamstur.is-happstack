@@ -11,7 +11,7 @@ url :: String
 url = "http://gisli.hamstur.is/"
 
 feedUrl :: String
-feedUrl = "http://feeds2.feedburner.com/gisli-hamstur-is"
+feedUrl = "http://feeds.feedburner.com/gisli-hamstur-is"
 
 data AppEnv a b = AppEnv {
      baseGroup     :: STGroup a,

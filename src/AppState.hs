@@ -14,7 +14,7 @@ import System.Time (ClockTime(TOD))
 import Model.Blog
 import Model.Tag
 import Model.User
-import AppEnv
+--import AppEnv
 import AppState.Types
 import AppState.Session
 import AppState.Blog
@@ -23,7 +23,9 @@ import AppState.User
 import AppState.AppDate
 
 
+-- should be a part of Model.App
 instance Component AppState where 
+--         type Dependencies AppState = Blog :+: End 
          type Dependencies AppState = End 
          initialValue = AppState { 
                       blogs =  [],

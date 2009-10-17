@@ -19,8 +19,8 @@ import Text.StringTemplate (newSTMP)
 main :: IO ()
 main = do
      putStrLn "Starting ..."
-     control <- startSystemState entryPoint
-     tid <- forkIO $ simpleHTTP (Conf {port=5000, validator=Nothing}) $
+----     control <- startSystemState entryPoint
+     tid <- forkIO $ simpleHTTP Conf {port=5000, validator=Nothing} $ --msum [dir "test" (return "hello world")]
                    (msum $ [
                    dir "users" userController,
                    dir "blog" blogController,
@@ -36,7 +36,7 @@ main = do
      waitForTermination
      putStrLn "Shutting down..."
      killThread tid
-     shutdownSystem control
+----     shutdownSystem control
      putStrLn "Shutdown complete"
 
 entryPoint :: Proxy AppState
