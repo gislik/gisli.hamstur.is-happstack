@@ -12,7 +12,7 @@ module Model.Blog (
                   ) where
 
 import Data.Time
-import Text.StringTemplate
+--  import Text.StringTemplate
 import Data.Map
 import Data.Char (isNumber)
 import Data.List (sortBy)
@@ -27,7 +27,7 @@ import System.Time (ClockTime(TOD))
 import System.Locale (defaultTimeLocale)
 import AppEnv (title, author, url, feedUrl)
 import Model.User
-import Util.Atom
+--  import Util.Atom
 
 import qualified Model.Blog1 as B1
 
@@ -80,61 +80,61 @@ sortByDate = sortBy (\b1 b2 -> compare (blogDate b1) (blogDate b2))
 
 
 -- TEMPLATE
-instance ToSElem Blog where
-         toSElem b = (toSElem.fromList. Prelude.filter ((/=)"False".snd)) [("id", (show.blogID) b), 
-                                         ("title", blogTitle b), 
-                                         ("body", blogBody b), 
-                                         ("date", (stringTemplateFormattedShow "%d.%m.%Y".fromBlogDate.blogPublishedDate) b), 
-                                         ("time", (stringTemplateFormattedShow "%H:%M:%S".fromBlogDate.blogPublishedDate) b), 
-                                         ("author", (name.blogAuthor) b),
-                                         ("private", (show.blogPrivate) b)]
+--  instance ToSElem Blog where
+         --  toSElem b = (toSElem.fromList. Prelude.filter ((/=)"False".snd)) [("id", (show.blogID) b), 
+                                         --  ("title", blogTitle b), 
+                                         --  ("body", blogBody b), 
+                                         --  ("date", (stringTemplateFormattedShow "%d.%m.%Y".fromBlogDate.blogPublishedDate) b), 
+                                         --  ("time", (stringTemplateFormattedShow "%H:%M:%S".fromBlogDate.blogPublishedDate) b), 
+                                         --  ("author", (name.blogAuthor) b),
+                                         --  ("private", (show.blogPrivate) b)]
 
 type Blogs = [Blog] -- this needs to be changed to a map with blogsLastUpdated contained
 
 -- ATOM
-instance Feedable Blogs where
-         toFeed updated bs = withFeedItems (Prelude.map toItem bs) $ AtomFeed bs' { 
-                                                                                    feedAuthors=[author'], 
-                                                                                    feedLinks=[link'], 
-                                                                                    feedRights=Just rights' 
-                                                                                    }
-                             where bs' = (nullFeed "tag:gisli.hamstur.is" 
-                                         (HTMLString title) 
-                                         (formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" updated))
-                                   link' = Link { 
-                                                  linkHref      = feedUrl, 
-                                                  linkRel       = (Just . Left) "self", 
-                                                  linkType      = Nothing, 
-                                                  linkHrefLang  = Nothing,
-                                                  linkTitle     = Nothing,
-                                                  linkLength    = Nothing,
-                                                  linkAttrs     = [],
-                                                  linkOther     = []
-                                                  }
-instance Feedable Blog where
-         toItem b = 
-                    AtomItem $ b' { 
-                                    entryAuthors=[author'], 
-                                    entryContent=Just (HTMLContent (blogBody b)), 
-                                    entryLinks=[link' b], 
-                                    entryRights=Just rights' 
-                                    }
-                             where b' = nullEntry ("tag:gisli.hamstur.is,"
-                                                     ++(stringTemplateFormattedShow "%Y-%m-%d".fromBlogDate.blogDate) b
-                                                     ++":"
-                                                     ++(show.blogID) b)
-                                                    (TextString (blogTitle b))
-                                                    ((formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ".fromBlogDate.blogDate) b)
-                                   link' b = Link {
-                                                    linkHref      = url++"blog/show/"++(show.blogID) b,
-                                                    linkRel       = (Just . Left) "alternate", 
-                                                    linkType      = Nothing, 
-                                                    linkHrefLang  = Nothing,
-                                                    linkTitle     = Nothing,
-                                                    linkLength    = Nothing,
-                                                    linkAttrs     = [],
-                                                    linkOther     = []
-                                                    }
+--  instance Feedable Blogs where
+         --  toFeed updated bs = withFeedItems (Prelude.map toItem bs) $ AtomFeed bs' { 
+                                                                                    --  feedAuthors=[author'], 
+                                                                                    --  feedLinks=[link'], 
+                                                                                    --  feedRights=Just rights' 
+                                                                                    --  }
+                             --  where bs' = (nullFeed "tag:gisli.hamstur.is" 
+                                         --  (HTMLString title) 
+                                         --  (formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ" updated))
+                                   --  link' = Link { 
+                                                  --  linkHref      = feedUrl, 
+                                                  --  linkRel       = (Just . Left) "self", 
+                                                  --  linkType      = Nothing, 
+                                                  --  linkHrefLang  = Nothing,
+                                                  --  linkTitle     = Nothing,
+                                                  --  linkLength    = Nothing,
+                                                  --  linkAttrs     = [],
+                                                  --  linkOther     = []
+                                                  --  }
+--  instance Feedable Blog where
+         --  toItem b = 
+                    --  AtomItem $ b' { 
+                                    --  entryAuthors=[author'], 
+                                    --  entryContent=Just (HTMLContent (blogBody b)), 
+                                    --  entryLinks=[link' b], 
+                                    --  entryRights=Just rights' 
+                                    --  }
+                             --  where b' = nullEntry ("tag:gisli.hamstur.is,"
+                                                     --  ++(stringTemplateFormattedShow "%Y-%m-%d".fromBlogDate.blogDate) b
+                                                     --  ++":"
+                                                     --  ++(show.blogID) b)
+                                                    --  (TextString (blogTitle b))
+                                                    --  ((formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%SZ".fromBlogDate.blogDate) b)
+                                   --  link' b = Link {
+                                                    --  linkHref      = url++"blog/show/"++(show.blogID) b,
+                                                    --  linkRel       = (Just . Left) "alternate", 
+                                                    --  linkType      = Nothing, 
+                                                    --  linkHrefLang  = Nothing,
+                                                    --  linkTitle     = Nothing,
+                                                    --  linkLength    = Nothing,
+                                                    --  linkAttrs     = [],
+                                                    --  linkOther     = []
+                                                    --  }
 
 author' :: Person
 author' = Person { personName=author, personURI=Just url, personEmail=Nothing, personOther=[] }

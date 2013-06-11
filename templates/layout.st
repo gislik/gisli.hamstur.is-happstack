@@ -58,7 +58,7 @@ jQuery(function() {
   <h2>".... já"</h2>
   
   <ul id="nav">
-    <li><a id="me" class="proxyStatic" heading="Um mig" href="http://google.com/notebook/public/01738234982158720746/BDSdwQwoQzPC91Psi">Ég</a></li>
+    <li><a id="me" class="proxyStatic" heading="Um mig" href="http://www.google.com/notebook/public/01738234982158720746/BDSdwQwoQzPC91Psi">Ég</a></li>
     <li><a id="blog" class="proxyPseudo" href="/blog/">Blog</a></li>
     <li><a id="albums" class="proxyAlbum" heading="Myndir" href="http://picasaweb.google.com/data/feed/base/user/giskri?kind=album&alt=rss&hl=en_US&access=public">Myndir</a></li>
     <li><a id="projects" class="proxyStatic" heading="Verkefni" href="http://www.google.com/notebook/public/01738234982158720746/BDShxQwoQoIbXy_oi">Verkefni</a></li>
